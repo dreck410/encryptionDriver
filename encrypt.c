@@ -12,9 +12,9 @@
 #include <linux/fcntl.h> /* O_ACCMODE */
 #include <asm/system.h> /* cli(), *_flags */
 #include <asm/uaccess.h> /* copy_from/to_user */
-#include <stdio.h>
+//#include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <fcntl.h>
 
 
@@ -58,7 +58,7 @@ char* encrypt_ROT_47(const char* inputString){
 	
 	int strLeng = strlen(inputString);
 
-	char* ca = malloc(strLeng); 
+	char* ca = kmalloc(strLeng); 
 	int i = 0;
 	for (i = 0; i < strLeng; i++)
 	{
@@ -139,15 +139,35 @@ int encrypt_release(struct inode *inode, struct file *filp) {
   return 0;
 }
 
-ssize_t encrypt_read(struct file *filp, char *buf, 
-                    size_t count, loff_t *f_pos) { 
-	// Give the encrypted Data.
+ssize_t encrypt_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) { 
+
+    /* Transfering data to user space */ 
+    copy_to_user(buf,myToEncrypt_buffer,myBufferSize);
+
+    /* Changing reading position as best suits */ 
+
+    if (*f_pos == 0) { 
+        *f_pos+=myBufferSize; 
+        return myBufferSize; 
+    } else { 
+
+        return 0; 
+    }
 }
 
-ssize_t encrypt_write( struct file *filp, char *buf,
-                      size_t count, loff_t *f_pos) {
+ssize_t encrypt_write( struct file *filp, char *buf, size_t count, loff_t *f_pos) {
 
-	// Encrypt Some Data
-	
+  if(myToEncrypt_buffer){ //if already used
+  	kfree(myToEncrypt_buffer);
+  }
+  myBufferSize = count;
+  myToEncrypt_buffer = kmalloc(count+1, GFP_KERNEL); 
+
+  //NEED TO 0
+  
+ 
+  copy_from_user(myToEncrypt_buffer,buf,count); //SEND TO SAID BUFFER
+  //toEncrypt //GET ENCRYPTED VERSION
+  myToEncrypt_buffer = toEncrypt(myToEncrypt_buffer);
+  return count;
 }
-
