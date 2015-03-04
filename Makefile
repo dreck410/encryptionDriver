@@ -1,7 +1,6 @@
-obj-m = nothing.o memory.o emoticon.o 
-KVERSION = $(shell uname -r)
+obj-m = encrypt.o 
+KVERSION = /usr/src/linux-headers-3.2.0-35-generic-pae
 all:
-	make -C /lib/modules/$(KVERSION)/build M=$(PWD) modules
+	$(MAKE) -C $(KVERSION) SUBDIRS=$(PWD) modules
 clean:
-	make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
-
+	make -C /lib/modules/$(KVERSION) M=$(PWD) clean
