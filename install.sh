@@ -1,6 +1,7 @@
 #!/bin/bash
 #sudo apt-get install linux-headers-generic-pae
 make
-sudo insmod encrypt.ko
-sudo mknod /dev/encrypt c 60 0
-sudo chmod 666 /dev/encrypt
+insmod encrypt.ko
+mknod /dev/encrypt c 60 0
+chmod 666 /dev/encrypt
+gcc rot47.c -o rot47

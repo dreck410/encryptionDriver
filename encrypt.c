@@ -52,13 +52,13 @@ char *encrypted_data;
 
 
 // The encrypt method.
-char* encrypt_ROT_47(const char* inputString){
+char* encrypt_ROT_47(const char* inputString, int size){
 	
 	printf("%s\n", inputString);
 	
 	int strLeng = strlen(inputString);
 
-	char* ca = kmalloc(strLeng); 
+	char* ca = kmalloc(strLeng, GFP_KERNEL); 
 	int i = 0;
 	for (i = 0; i < strLeng; i++)
 	{
@@ -83,6 +83,8 @@ char* encrypt_ROT_47(const char* inputString){
 	return ca;
 
 }
+
+
 
 
 int encrypt_init(void) {
@@ -139,35 +141,29 @@ int encrypt_release(struct inode *inode, struct file *filp) {
   return 0;
 }
 
+// gets the data and gives it to the user
 ssize_t encrypt_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) { 
+     
+  int datasize = strlen(filp->private_data);
+           
+  copy_to_user(buf,filp->private_data,count);
 
-    /* Transfering data to user space */ 
-    copy_to_user(buf,myToEncrypt_buffer,myBufferSize);
-
-    /* Changing reading position as best suits */ 
-
-    if (*f_pos == 0) { 
-        *f_pos+=myBufferSize; 
-        return myBufferSize; 
-    } else { 
-
-        return 0; 
-    }
+  return count; 
 }
 
+
+//Encrypts the input information!
 ssize_t encrypt_write( struct file *filp, char *buf, size_t count, loff_t *f_pos) {
 
-  if(myToEncrypt_buffer){ //if already used
-  	kfree(myToEncrypt_buffer);
+  if (filp->private_data != NULL)
+  {
+    /* code */
+    kfree(filp->private_data);
   }
-  myBufferSize = count;
-  myToEncrypt_buffer = kmalloc(count+1, GFP_KERNEL); 
 
-  //NEED TO 0
-  
- 
-  copy_from_user(myToEncrypt_buffer,buf,count); //SEND TO SAID BUFFER
-  //toEncrypt //GET ENCRYPTED VERSION
-  myToEncrypt_buffer = toEncrypt(myToEncrypt_buffer);
+  char* data_to_encrypt = kmalloc(count + 1, GFP_KERNEL); 
+  copy_from_user(data_to_encrypt, buf, count);
+  filp->private_data = encrypt_ROT_47(data_to_encrypt, count);
+
   return count;
 }
