@@ -51,7 +51,7 @@ char *encrypted_data;
 char* encrypt_ROT_47(const char* inputString, int size){
 	
 	//printf("%s\n", inputString);
-	printk("Encrypting");
+	printk("| Encrypting");
 	int strLeng = strlen(inputString);
 
 	char* ca = kmalloc(strLeng, GFP_KERNEL); 
@@ -76,7 +76,7 @@ char* encrypt_ROT_47(const char* inputString, int size){
 			ca[i] = c;	
 		}
 	} 
-  printk("Encrypted");
+  printk("| Encrypted");
 	return ca;
 
 }
@@ -142,9 +142,9 @@ int encrypt_release(struct inode *inode, struct file *filp) {
 ssize_t encrypt_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) { 
      
   //int datasize = strlen(filp->private_data);
-  printk("reading");
+  printk("| reading");
   copy_to_user(buf,filp->private_data,count);
-  printk("read");
+  printk("| read\n");
   return count; 
 }
 
@@ -157,10 +157,10 @@ ssize_t encrypt_write( struct file *filp, char *buf, size_t count, loff_t *f_pos
     /* code */
     kfree(filp->private_data);
   }
-  printk("Writing");
+  printk("| Writing");
   char* data_to_encrypt = kmalloc(count + 1, GFP_KERNEL); 
   copy_from_user(data_to_encrypt, buf, count);
   filp->private_data = encrypt_ROT_47(data_to_encrypt, count);
-  printk("Written");
+  printk("| Written");
   return count;
 }
