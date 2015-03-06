@@ -12,10 +12,6 @@
 #include <linux/fcntl.h> /* O_ACCMODE */
 #include <asm/system.h> /* cli(), *_flags */
 #include <asm/uaccess.h> /* copy_from/to_user */
-//#include <stdio.h>
-#include <unistd.h>
-//#include <stdlib.h>
-#include <fcntl.h>
 
 
 MODULE_LICENSE("Dual BSD/GPL");
@@ -54,8 +50,8 @@ char *encrypted_data;
 // The encrypt method.
 char* encrypt_ROT_47(const char* inputString, int size){
 	
-	printf("%s\n", inputString);
-	
+	//printf("%s\n", inputString);
+	printk("Encrypting");
 	int strLeng = strlen(inputString);
 
 	char* ca = kmalloc(strLeng, GFP_KERNEL); 
@@ -80,6 +76,7 @@ char* encrypt_ROT_47(const char* inputString, int size){
 			ca[i] = c;	
 		}
 	} 
+  printk("Encrypted");
 	return ca;
 
 }
@@ -99,13 +96,13 @@ int encrypt_init(void) {
   }
 
   /* Allocating encrypt for the buffer */
-  encrypt_buffer = kmalloc(1, GFP_KERNEL); 
-  if (!encrypt_buffer) { 
-    result = -ENOMEM;
-    goto fail; 
-  } 
-  memset(encrypt_buffer, 0, 1);
-
+  //encrypt_buffer = kmalloc(1, GFP_KERNEL); 
+//  if (!encrypt_buffer) { 
+//    result = -ENOMEM;
+//    goto fail; 
+//  } 
+//  memset(encrypt_buffer, 0, 1);
+//
   printk("<1>Inserting encrypt module\n"); 
   return 0;
 
@@ -144,10 +141,10 @@ int encrypt_release(struct inode *inode, struct file *filp) {
 // gets the data and gives it to the user
 ssize_t encrypt_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) { 
      
-  int datasize = strlen(filp->private_data);
-           
+  //int datasize = strlen(filp->private_data);
+  printk("reading");
   copy_to_user(buf,filp->private_data,count);
-
+  printk("read");
   return count; 
 }
 
@@ -160,10 +157,10 @@ ssize_t encrypt_write( struct file *filp, char *buf, size_t count, loff_t *f_pos
     /* code */
     kfree(filp->private_data);
   }
-
+  printk("Writing");
   char* data_to_encrypt = kmalloc(count + 1, GFP_KERNEL); 
   copy_from_user(data_to_encrypt, buf, count);
   filp->private_data = encrypt_ROT_47(data_to_encrypt, count);
-
+  printk("Written");
   return count;
 }

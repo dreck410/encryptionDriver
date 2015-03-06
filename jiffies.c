@@ -92,8 +92,7 @@ int jiffies_release(struct inode *inode, struct file *filp) {
   return 0;
 }
 
-ssize_t jiffies_read(struct file *filp, char *buf, 
-                    size_t count, loff_t *f_pos) { 
+ssize_t jiffies_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) { 
  
   int datasize = strlen(filp->private_data);
   int available_to_read;
